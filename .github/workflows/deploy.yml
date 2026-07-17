@@ -1,0 +1,30 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        default: dev
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render deployment bundle
+        run: |
+          mkdir -p bundle
+          cp -R infrastructure bundle/
+          cp docker/docker-compose.yml bundle/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deployment-bundle-${{ inputs.environment }}
+          path: bundle
+          retention-days: 14

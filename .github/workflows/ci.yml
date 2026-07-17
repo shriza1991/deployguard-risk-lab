@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+      - name: Lint backend
+        working-directory: backend
+        run: ruff check .
+      - name: Test backend
+        working-directory: backend
+        run: pytest
+
+  frontend:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+      - name: Lint frontend
+        working-directory: frontend
+        run: npm run lint
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+  docker:
+    runs-on: ubuntu-24.04
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build container image
+        run: docker build -f docker/Dockerfile -t deployguard-risk-lab:${{ github.sha }} .
+      - name: Save image artifact
+        run: docker save deployguard-risk-lab:${{ github.sha }} -o deployguard-risk-lab-image.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deployguard-risk-lab-image
+          path: deployguard-risk-lab-image.tar
+          retention-days: 7
+

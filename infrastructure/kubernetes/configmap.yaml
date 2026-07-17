@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: risk-lab-config
+  namespace: deployguard-risk-lab
+data:
+  ENVIRONMENT: "dev"
+  API_PREFIX: "/api/v1"
+  LOG_LEVEL: "INFO"
+
