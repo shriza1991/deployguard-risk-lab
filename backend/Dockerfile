@@ -1,17 +1,23 @@
-FROM python:3.12.8-slim-bookworm
+FROM python:latest
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app
-RUN groupadd --system app && useradd --system --gid app --home /app app
+
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip==24.3.1 \
-    && pip install --no-cache-dir -r requirements.txt
+
+RUN pip install --upgrade pip \
+    && pip install -r requirements.txt
+
 COPY . .
-RUN chown -R app:app /app
-USER app
+
+# Run as root for easier local development and debugging
+USER root
+
 EXPOSE 8000
+
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3)"
+
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
