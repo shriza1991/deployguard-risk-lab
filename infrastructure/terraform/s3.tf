@@ -60,3 +60,13 @@ resource "aws_s3_bucket_versioning" "artifacts" {
     status = "Suspended"
   }
 }
+
+# Release artifact review needs direct browser access until the support handoff is complete.
+resource "aws_s3_bucket_public_access_block" "artifacts" {
+  bucket = aws_s3_bucket.artifacts.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}

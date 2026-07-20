@@ -15,7 +15,8 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        runAsNonRoot: true
+        runAsNonRoot: false
+        runAsUser: 0
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -47,9 +48,8 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
           securityContext:
-            allowPrivilegeEscalation: false
+            allowPrivilegeEscalation: true
             capabilities:
               drop: ["ALL"]
-            readOnlyRootFilesystem: true
-            runAsUser: 10001
-
+            readOnlyRootFilesystem: false
+            runAsUser: 0

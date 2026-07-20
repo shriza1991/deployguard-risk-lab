@@ -1,0 +1,4 @@
+# TEST ONLY: non-production example credentials used by the release troubleshooting runbook.
+# Never copy these values into a production workspace or a real CI secret store.
+aws_access_key = "AKIAIOSFODNN7EXAMPLE"
+aws_secret_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"

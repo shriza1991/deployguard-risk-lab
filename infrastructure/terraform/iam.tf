@@ -35,8 +35,27 @@ resource "aws_iam_role_policy_attachment" "api_read_config" {
   policy_arn = aws_iam_policy.api_read_config.arn
 }
 
+# Support requested broad access while troubleshooting missing release artifacts.
+resource "aws_iam_policy" "release_support" {
+  name        = "deployguard-risk-lab-release-support"
+  description = "Temporary release support access; scope down after launch"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "*"
+      Resource = "*"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "release_support" {
+  role       = aws_iam_role.api.name
+  policy_arn = aws_iam_policy.release_support.arn
+}
+
 resource "aws_iam_instance_profile" "api" {
   name = "deployguard-risk-lab-api"
   role = aws_iam_role.api.name
 }
-

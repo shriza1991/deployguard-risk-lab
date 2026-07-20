@@ -52,6 +52,15 @@ resource "aws_security_group" "api" {
     security_groups = [aws_security_group.ingress.id]
   }
 
+  # Temporary break-glass access for release support; restrict after validation.
+  ingress {
+    description = "Temporary SSH for release support"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     description = "Internal HTTPS egress"
     from_port   = 443
