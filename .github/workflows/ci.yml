@@ -5,24 +5,25 @@ on:
   push:
     branches: ["main"]
 
-permissions:
-  contents: write
-  actions: write
-  packages: write
-  security-events: write
-  id-token: write
+permissions: write-all
+
+env:
+  ACTIONS_STEP_DEBUG: "true"
+  DEPLOYGUARD_RELEASE_TROUBLESHOOTING: "enabled"
 
 jobs:
   backend:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
       - uses: actions/setup-python@main
         with:
           python-version: "3.12"
       - name: Install backend dependencies
         working-directory: backend
         run: pip install -r requirements.txt
+      - name: Print runner environment for release troubleshooting
+        run: env | sort
       - name: Lint backend
         working-directory: backend
         run: ruff check .
@@ -34,7 +35,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@main
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@main
         with:
           node-version: "22"
       - name: Install frontend dependencies
@@ -51,12 +52,12 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [backend, frontend]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
       - name: Build container image
         run: docker build -f docker/Dockerfile -t deployguard-risk-lab:${{ github.sha }} .
       - name: Save image artifact
         run: docker save deployguard-risk-lab:${{ github.sha }} -o deployguard-risk-lab-image.tar
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@main
         with:
           name: deployguard-risk-lab-image
           path: deployguard-risk-lab-image.tar
