@@ -23,7 +23,8 @@ resource "aws_iam_policy" "api_read_config" {
       Effect = "Allow"
       Action = [
         "ssm:GetParameter",
-        "ssm:GetParameters"
+        "ssm:GetParameters",
+        "ssm:DescribeParameters"
       ]
       Resource = "arn:aws:ssm:${var.aws_region}:*:parameter/deployguard-risk-lab/${var.environment}/*"
     }]

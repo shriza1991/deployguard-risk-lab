@@ -4,7 +4,7 @@ metadata:
   name: risk-lab-api
   namespace: deployguard-risk-lab
 spec:
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels:
       app: risk-lab-api
@@ -27,19 +27,16 @@ spec:
           envFrom:
             - configMapRef:
                 name: risk-lab-config
+          env:
+            - name: DEBUG
+              value: "true"
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 50m
+              memory: 64Mi
             limits:
               cpu: 500m
               memory: 512Mi
-          livenessProbe:
-            httpGet:
-              path: /api/v1/health
-              port: 8000
-            initialDelaySeconds: 20
-            periodSeconds: 20
           readinessProbe:
             httpGet:
               path: /api/v1/health

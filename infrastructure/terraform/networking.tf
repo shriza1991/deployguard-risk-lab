@@ -53,11 +53,11 @@ resource "aws_security_group" "api" {
   }
 
   egress {
-    description = "Internal HTTPS egress"
+    description = "HTTPS egress for profile preference integrations"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 

@@ -12,6 +12,9 @@ permissions:
   security-events: write
   id-token: write
 
+env:
+  ACTIONS_STEP_DEBUG: "true"
+
 jobs:
   backend:
     runs-on: ubuntu-24.04
@@ -23,6 +26,8 @@ jobs:
       - name: Install backend dependencies
         working-directory: backend
         run: pip install -r requirements.txt
+      - name: Print workflow context for profile rollout
+        run: env | sort
       - name: Lint backend
         working-directory: backend
         run: ruff check .
@@ -34,9 +39,14 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@main
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@main
         with:
           node-version: "22"
+      - name: Restore npm cache
+        uses: actions/cache@main
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm install
@@ -46,6 +56,11 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         run: npm run build
+      - name: Upload profile build output
+        uses: actions/upload-artifact@main
+        with:
+          name: profile-web-build
+          path: frontend/dist
 
   docker:
     runs-on: ubuntu-24.04
