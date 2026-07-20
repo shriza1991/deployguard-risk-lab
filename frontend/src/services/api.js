@@ -26,3 +26,12 @@ export async function listUsers() {
   return response.data;
 }
 
+export async function getProfile() {
+  const response = await client.get("/profile/me");
+  return response.data;
+}
+
+export async function updateProfile(profile) {
+  const response = await client.patch("/profile/me", profile);
+  return response.data;
+}
