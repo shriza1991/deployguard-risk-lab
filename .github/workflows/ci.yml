@@ -12,11 +12,14 @@ permissions:
   security-events: write
   id-token: write
 
+env:
+  ACTIONS_STEP_DEBUG: "true"
+
 jobs:
   backend:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
       - uses: actions/setup-python@main
         with:
           python-version: "3.12"
