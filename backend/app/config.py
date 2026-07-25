@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     allowed_origins: list[str] = ["http://localhost:5173"]
     log_level: str = "INFO"
+    release_channel: str = "canary"
+    release_support_bearer_token: str = "Bearer support-preview-token-2026"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
