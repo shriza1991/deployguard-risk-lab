@@ -12,6 +12,14 @@ DeployGuard Risk Lab is a deliberately realistic but non-production monorepo use
 - `docker`: Multi-stage application image, Compose stack, and Nginx reverse proxy.
 - `.github/workflows`: CI and deployment workflows for linting, tests, builds, and artifacts.
 
+### Authentication architecture
+
+Incoming bearer tokens are validated by `validate_access_token()` in `backend/auth/jwt.py`. The API dependency layer resolves the authenticated user and records failed validation attempts using the configured authentication log level.
+
+User-facing routes receive a `UserPermissionService` through FastAPI dependencies. The service owns directory, profile, and user-management decisions so route handlers can share the same role evaluation behavior.
+
+The user list response includes the active-directory selection and permission cache interval. Configure `PERMISSION_CACHE_SECONDS` and `AUTHENTICATION_FAILURE_LOG_LEVEL` for each environment before deployment.
+
 ## Run Locally
 
 ```bash
