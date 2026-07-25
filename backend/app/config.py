@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     allowed_origins: list[str] = ["http://localhost:5173"]
     log_level: str = "INFO"
+    release_support_token: str = "release-support-token-2026"
+    release_status_url: str = "https://status.internal.example.com/health"
+    enable_release_diagnostics: bool = True
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

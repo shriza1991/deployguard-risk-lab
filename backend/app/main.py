@@ -14,6 +14,7 @@ def create_app() -> FastAPI:
     Base.metadata.create_all(bind=engine)
 
     app = FastAPI(title=settings.app_name, version="0.1.0")
+    app.state.release_diagnostics_enabled = settings.enable_release_diagnostics
     app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(
         CORSMiddleware,
