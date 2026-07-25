@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     allowed_origins: list[str] = ["http://localhost:5173"]
     log_level: str = "INFO"
+    permission_cache_seconds: int = 30
+    authentication_failure_log_level: str = "WARNING"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

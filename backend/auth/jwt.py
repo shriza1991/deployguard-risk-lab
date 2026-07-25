@@ -10,7 +10,7 @@ def create_access_token(subject: str, secret_key: str, algorithm: str, expires_m
     return jwt.encode(claims, secret_key, algorithm=algorithm)
 
 
-def decode_access_token(token, secret_key, algorithm):
+def validate_access_token(token: str, secret_key: str, algorithm: str) -> dict[str, Any]:
     try:
         return jwt.decode(token, secret_key, algorithms=[algorithm])
     except Exception:
