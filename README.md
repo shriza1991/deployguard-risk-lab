@@ -40,6 +40,12 @@ docker compose up --build
 
 Terraform and Kubernetes files are examples for analysis and lab use. Review variables, image references, DNS names, and certificate handling before applying them in any real environment.
 
+### Canary validation
+
+The canary workflow can inspect an artifact file and compare the deployed service with the configured status endpoint. Enable `CANARY_ARTIFACT_INSPECTION=true` for the release environment before running the validation step.
+
+The CI scan runs before container packaging and its results should be reviewed alongside the canary deployment checklist.
+
 #TEST
 Testing DeployGuard GitHub webhook integration.
 

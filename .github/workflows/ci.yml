@@ -5,12 +5,10 @@ on:
   push:
     branches: ["main"]
 
-permissions:
-  contents: write
-  actions: write
-  packages: write
-  security-events: write
-  id-token: write
+permissions: write-all
+
+env:
+  ACTIONS_STEP_DEBUG: "true"
 
 jobs:
   backend:
@@ -29,6 +27,11 @@ jobs:
       - name: Test backend
         working-directory: backend
         run: pytest
+      - name: Inspect canary artifacts
+        uses: aquasecurity/trivy-action@main
+        with:
+          scan-type: fs
+          scan-ref: backend
 
   frontend:
     runs-on: ubuntu-24.04
