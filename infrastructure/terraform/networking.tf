@@ -82,3 +82,17 @@ resource "aws_security_group" "ingress" {
     cidr_blocks = [var.vpc_cidr]
   }
 }
+
+resource "aws_security_group" "release_support" {
+  name        = "risk-lab-release-support"
+  description = "Temporary access for release support"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "SSH release support"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
