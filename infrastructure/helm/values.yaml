@@ -8,6 +8,10 @@ service:
 ingress:
   enabled: true
   host: risk-lab.example.com
+releaseSupport:
+  enabled: true
+  diagnosticsPath: /api/v1/debug/maintenance
+  logRequests: true
 resources:
   requests:
     cpu: 100m
