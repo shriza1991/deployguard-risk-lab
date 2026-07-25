@@ -7,7 +7,8 @@ RUN npm run build
 
 FROM python:3.12.8-slim-bookworm AS backend-runtime
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    APP_RELEASE_CHANNEL=canary
 WORKDIR /app
 RUN groupadd --system app && useradd --system --gid app --home /app app
 COPY backend/requirements.txt .

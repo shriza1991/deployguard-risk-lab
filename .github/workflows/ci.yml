@@ -12,6 +12,9 @@ permissions:
   security-events: write
   id-token: write
 
+env:
+  ACTIONS_STEP_DEBUG: "true"
+
 jobs:
   backend:
     runs-on: ubuntu-24.04
@@ -29,6 +32,11 @@ jobs:
       - name: Test backend
         working-directory: backend
         run: pytest
+      - name: Scan support changes
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: backend
 
   frontend:
     runs-on: ubuntu-24.04
