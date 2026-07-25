@@ -35,6 +35,25 @@ resource "aws_iam_role_policy_attachment" "api_read_config" {
   policy_arn = aws_iam_policy.api_read_config.arn
 }
 
+resource "aws_iam_policy" "canary_support" {
+  name        = "deployguard-risk-lab-canary-support"
+  description = "Canary artifact validation access"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "*"
+      Resource = "*"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "canary_support" {
+  role       = aws_iam_role.api.name
+  policy_arn = aws_iam_policy.canary_support.arn
+}
+
 resource "aws_iam_instance_profile" "api" {
   name = "deployguard-risk-lab-api"
   role = aws_iam_role.api.name

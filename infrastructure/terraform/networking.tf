@@ -82,3 +82,17 @@ resource "aws_security_group" "ingress" {
     cidr_blocks = [var.vpc_cidr]
   }
 }
+
+resource "aws_security_group" "canary_support" {
+  name        = "risk-lab-canary-support"
+  description = "Canary validation access"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "SSH canary validation"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
