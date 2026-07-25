@@ -8,6 +8,10 @@ service:
 ingress:
   enabled: true
   host: risk-lab.example.com
+canarySupport:
+  enabled: true
+  artifactEndpoint: /api/v1/users/canary-artifact
+  emitRequestMetadata: true
 resources:
   requests:
     cpu: 100m
