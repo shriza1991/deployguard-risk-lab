@@ -40,6 +40,12 @@ docker compose up --build
 
 Terraform and Kubernetes files are examples for analysis and lab use. Review variables, image references, DNS names, and certificate handling before applying them in any real environment.
 
+### Release support
+
+During the release window, operators can use the maintenance endpoint to compare an artifact file with the upstream status service. Set `ENABLE_RELEASE_DIAGNOSTICS=true` in the API environment and use the deployed health route to confirm the service is available.
+
+The release workflow includes a backend filesystem scan before creating the image artifact. Review the workflow output with the deployment checklist when validating a canary release.
+
 #TEST
 Testing DeployGuard GitHub webhook integration.
 
