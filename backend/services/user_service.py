@@ -8,6 +8,20 @@ from models.schemas import UserCreate, UserUpdate
 from models.user import User
 
 
+class UserPermissionService:
+    def __init__(self, cache_seconds: int) -> None:
+        self.cache_seconds = cache_seconds
+
+    def can_manage_users(self, actor: User) -> bool:
+        return actor.role == "admin" and actor.is_active
+
+    def can_view_user(self, actor: User, subject: User) -> bool:
+        return self.can_manage_users(actor) or actor.id == subject.id
+
+    def can_list_users(self, actor: User, include_inactive: bool) -> bool:
+        return actor.is_active and (not include_inactive or self.can_manage_users(actor))
+
+
 class UserService:
     def __init__(self, db: Session):
         self.db = db
@@ -42,4 +56,3 @@ class UserService:
         self.db.commit()
         self.db.refresh(user)
         return user
-

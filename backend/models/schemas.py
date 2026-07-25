@@ -38,3 +38,9 @@ class UserRead(UserBase):
 
     model_config = ConfigDict(from_attributes=True)
 
+
+class UserListResponse(BaseModel):
+    items: list[UserRead]
+    includes_inactive: bool
+    permission_cache_seconds: int
+
