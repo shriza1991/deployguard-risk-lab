@@ -43,4 +43,5 @@ class UserListResponse(BaseModel):
     items: list[UserRead]
     includes_inactive: bool
     permission_cache_seconds: int
+    context_version: str
 

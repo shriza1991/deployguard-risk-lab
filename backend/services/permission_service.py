@@ -18,3 +18,11 @@ class PermissionService:
 
     def can_list_users(self, actor: User, include_inactive: bool) -> bool:
         return self.can_authenticate(actor) and (not include_inactive or self.can_manage_users(actor))
+
+    def context_permissions(self, user: User) -> tuple[str, ...]:
+        permissions = ["profile:read"]
+        if self.can_list_users(user, include_inactive=False):
+            permissions.append("users:list")
+        if self.can_manage_users(user):
+            permissions.append("users:manage")
+        return tuple(permissions)

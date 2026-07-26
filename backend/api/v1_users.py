@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from api.dependencies import get_current_user, get_permission_service, get_user_service
+from api.dependencies import get_current_user, get_permission_service, get_user_context, get_user_service
+from auth.user_context import UserContext
 from models.schemas import UserCreate, UserListResponse, UserRead, UserUpdate
 from models.user import User
 from services.permission_service import PermissionService
@@ -15,6 +16,7 @@ def list_users(
     users: UserService = Depends(get_user_service),
     permissions: PermissionService = Depends(get_permission_service),
     current_user: User = Depends(get_current_user),
+    context: UserContext = Depends(get_user_context),
 ) -> UserListResponse:
     if not permissions.can_list_users(current_user, include_inactive):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
@@ -25,6 +27,7 @@ def list_users(
         items=records,
         includes_inactive=include_inactive,
         permission_cache_seconds=permissions.cache_ttl,
+        context_version=context.context_version,
     )
 
 

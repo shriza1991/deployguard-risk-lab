@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     session_cache_ttl: int = 30
+    user_context_cache_seconds: int = 30
     token_issuer: str = "deployguard-risk-lab"
     token_audience: str = "deployguard-api"
     allowed_origins: list[str] = ["http://localhost:5173"]

@@ -7,6 +7,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import get_settings
 from auth.session import validate_session_token
+from auth.user_context import UserContext, build_user_context
 
 
 class SessionAuthenticationMiddleware(BaseHTTPMiddleware):
@@ -23,7 +24,12 @@ class SessionAuthenticationMiddleware(BaseHTTPMiddleware):
         if scheme.lower() != "bearer" or not token:
             return JSONResponse(status_code=401, content={"detail": "Not authenticated"})
         try:
-            request.state.session_claims = validate_session_token(token, get_settings())
+            settings = get_settings()
+            claims = validate_session_token(token, settings)
+            context: UserContext = build_user_context(
+                claims, (), cache_seconds=settings.user_context_cache_seconds
+            )
+            request.state.user_context = context
         except JWTError:
             return JSONResponse(status_code=401, content={"detail": "Could not validate credentials"})
         return await call_next(request)

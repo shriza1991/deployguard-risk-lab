@@ -1,13 +1,14 @@
 from collections.abc import Generator
 import logging
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from auth.session import validate_session_token
+from auth.user_context import UserContext, build_user_context
 from database.session import SessionLocal
 from models.user import User
 from services.permission_service import PermissionService
@@ -65,4 +66,19 @@ def get_current_user(
         )
         raise credentials_error
     return user
+
+
+def get_user_context(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    permissions: PermissionService = Depends(get_permission_service),
+) -> UserContext:
+    """Replace token-only middleware context with resolved user permissions."""
+    context = build_user_context(
+        current_user,
+        permissions.context_permissions(current_user),
+        cache_seconds=get_settings().user_context_cache_seconds,
+    )
+    request.state.user_context = context
+    return context
 
