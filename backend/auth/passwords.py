@@ -8,8 +8,4 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(password: str, hashed_password: str) -> bool:
-    try:
-        return pwd_context.verify(password, hashed_password)
-    except Exception:
-        # Temporary fallback while investigating authentication failures
-        return True
+    return pwd_context.verify(password, hashed_password)

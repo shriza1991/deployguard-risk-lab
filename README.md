@@ -14,11 +14,11 @@ DeployGuard Risk Lab is a deliberately realistic but non-production monorepo use
 
 ### Authentication architecture
 
-Incoming bearer tokens are validated by `validate_access_token()` in `backend/auth/jwt.py`. The API dependency layer resolves the authenticated user and records failed validation attempts using the configured authentication log level.
+Incoming bearer tokens are validated by the shared `validate_session_token()` helper in `backend/auth/session.py`. It verifies the token signature, expiry, issuer, and audience. The session middleware performs this validation before protected `/api/v1/users` requests reach route handlers; the API dependency layer then resolves the authenticated user and records failed validation attempts using the configured authentication log level.
 
-User-facing routes receive a `UserPermissionService` through FastAPI dependencies. The service owns directory, profile, and user-management decisions so route handlers can share the same role evaluation behavior.
+User-facing routes receive a `PermissionService` through FastAPI dependencies. The service owns account-activity, directory, profile, and user-management decisions so route handlers share the same role evaluation behavior.
 
-The user list response includes the active-directory selection and permission cache interval. Configure `PERMISSION_CACHE_SECONDS` and `AUTHENTICATION_FAILURE_LOG_LEVEL` for each environment before deployment.
+The user list response includes the active-directory selection and session cache interval. Configure `SESSION_CACHE_TTL`, `TOKEN_ISSUER`, `TOKEN_AUDIENCE`, and `AUTHENTICATION_FAILURE_LOG_LEVEL` for each environment before deployment. Values for the issuer and audience must match the service that creates access tokens.
 
 ## Run Locally
 

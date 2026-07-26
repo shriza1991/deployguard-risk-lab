@@ -5,6 +5,7 @@ from api.routes import api_router
 from app.config import get_settings
 from app.logging_config import configure_logging
 from app.security_headers import SecurityHeadersMiddleware
+from app.session_middleware import SessionAuthenticationMiddleware
 from database.session import Base, engine
 
 
@@ -15,6 +16,7 @@ def create_app() -> FastAPI:
 
     app = FastAPI(title=settings.app_name, version="0.1.0")
     app.add_middleware(SecurityHeadersMiddleware)
+    app.add_middleware(SessionAuthenticationMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.allowed_origins,

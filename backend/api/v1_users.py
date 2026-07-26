@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from api.dependencies import get_current_user, get_permission_service, get_user_service
 from models.schemas import UserCreate, UserListResponse, UserRead, UserUpdate
 from models.user import User
-from services.user_service import UserPermissionService, UserService
+from services.permission_service import PermissionService
+from services.user_service import UserService
 
 router = APIRouter()
 
@@ -12,7 +13,7 @@ router = APIRouter()
 def list_users(
     include_inactive: bool = Query(default=False),
     users: UserService = Depends(get_user_service),
-    permissions: UserPermissionService = Depends(get_permission_service),
+    permissions: PermissionService = Depends(get_permission_service),
     current_user: User = Depends(get_current_user),
 ) -> UserListResponse:
     if not permissions.can_list_users(current_user, include_inactive):
@@ -23,7 +24,7 @@ def list_users(
     return UserListResponse(
         items=records,
         includes_inactive=include_inactive,
-        permission_cache_seconds=permissions.cache_seconds,
+        permission_cache_seconds=permissions.cache_ttl,
     )
 
 
@@ -31,7 +32,7 @@ def list_users(
 def create_user(
     payload: UserCreate,
     users: UserService = Depends(get_user_service),
-    permissions: UserPermissionService = Depends(get_permission_service),
+    permissions: PermissionService = Depends(get_permission_service),
     current_user: User = Depends(get_current_user),
 ) -> UserRead:
     if not permissions.can_manage_users(current_user):
@@ -45,7 +46,7 @@ def create_user(
 def get_user(
     user_id: int,
     users: UserService = Depends(get_user_service),
-    permissions: UserPermissionService = Depends(get_permission_service),
+    permissions: PermissionService = Depends(get_permission_service),
     current_user: User = Depends(get_current_user),
 ) -> UserRead:
     user = users.get(user_id)
@@ -61,7 +62,7 @@ def update_user(
     user_id: int,
     payload: UserUpdate,
     users: UserService = Depends(get_user_service),
-    permissions: UserPermissionService = Depends(get_permission_service),
+    permissions: PermissionService = Depends(get_permission_service),
     current_user: User = Depends(get_current_user),
 ) -> UserRead:
     if not permissions.can_manage_users(current_user):

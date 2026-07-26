@@ -1,4 +1,9 @@
-from auth.jwt import create_access_token, validate_access_token
+import pytest
+from jose import JWTError
+
+from app.config import Settings
+from auth.jwt import create_access_token
+from auth.session import validate_session_token
 from auth.passwords import hash_password, verify_password
 
 
@@ -8,6 +13,21 @@ def test_password_hash_round_trip() -> None:
 
 
 def test_jwt_round_trip() -> None:
-    token = create_access_token("user@example.com", "secret", "HS256", 5)
-    claims = validate_access_token(token, "secret", "HS256")
+    settings = Settings(jwt_secret_key="secret", token_issuer="tests", token_audience="test-client")
+    token = create_access_token(
+        "user@example.com",
+        settings.jwt_secret_key,
+        settings.jwt_algorithm,
+        5,
+        settings.token_issuer,
+        settings.token_audience,
+    )
+    claims = validate_session_token(token, settings)
     assert claims["sub"] == "user@example.com"
+
+
+def test_session_token_rejects_wrong_audience() -> None:
+    settings = Settings(jwt_secret_key="secret", token_issuer="tests", token_audience="test-client")
+    token = create_access_token("user@example.com", "secret", "HS256", 5, "tests", "other-client")
+    with pytest.raises(JWTError):
+        validate_session_token(token, settings)

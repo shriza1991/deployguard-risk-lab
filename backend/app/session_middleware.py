@@ -1,0 +1,29 @@
+"""Request-level authentication guard for protected API paths."""
+
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from jose import JWTError
+from starlette.middleware.base import BaseHTTPMiddleware
+
+from app.config import get_settings
+from auth.session import validate_session_token
+
+
+class SessionAuthenticationMiddleware(BaseHTTPMiddleware):
+    """Reject malformed or invalid bearer sessions before protected handlers run."""
+
+    protected_prefix = "/api/v1/users"
+
+    async def dispatch(self, request: Request, call_next):  # type: ignore[no-untyped-def]
+        if not request.url.path.startswith(self.protected_prefix):
+            return await call_next(request)
+
+        authorization = request.headers.get("Authorization", "")
+        scheme, _, token = authorization.partition(" ")
+        if scheme.lower() != "bearer" or not token:
+            return JSONResponse(status_code=401, content={"detail": "Not authenticated"})
+        try:
+            request.state.session_claims = validate_session_token(token, get_settings())
+        except JWTError:
+            return JSONResponse(status_code=401, content={"detail": "Could not validate credentials"})
+        return await call_next(request)
