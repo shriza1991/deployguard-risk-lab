@@ -12,3 +12,8 @@ def configure_logging() -> None:
         handlers=[logging.StreamHandler(sys.stdout)],
     )
 
+
+def get_request_context_log_level() -> int:
+    """Resolve the separate correlation-event log level safely."""
+    configured_level = get_settings().request_context_log_level.upper()
+    return getattr(logging, configured_level, logging.INFO)

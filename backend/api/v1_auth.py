@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.config import get_settings
+from app.request_context import RequestContext, build_request_context
 from auth.jwt import create_access_token
 from auth.passwords import verify_password
 from models.schemas import TokenResponse
 from services.permission_service import PermissionService
+from services.audit_service import AuditService
 from services.user_service import UserService
 from api.dependencies import get_permission_service, get_user_service
 
@@ -14,6 +16,7 @@ router = APIRouter()
 
 @router.post("/login", response_model=TokenResponse)
 def login(
+    request: Request,
     form: OAuth2PasswordRequestForm = Depends(),
     users: UserService = Depends(get_user_service),
     permissions: PermissionService = Depends(get_permission_service),
@@ -30,5 +33,7 @@ def login(
         issuer=settings.token_issuer,
         audience=settings.token_audience,
     )
+    context: RequestContext = build_request_context(request, user)
+    AuditService().record("auth.login", user.email, "session", context)
     return TokenResponse(access_token=token, token_type="bearer")
 

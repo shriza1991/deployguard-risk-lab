@@ -6,6 +6,7 @@ from jose import JWTError
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import get_settings
+from app.request_context import RequestContext, build_request_context
 from auth.session import validate_session_token
 from auth.user_context import UserContext, build_user_context
 
@@ -26,6 +27,8 @@ class SessionAuthenticationMiddleware(BaseHTTPMiddleware):
         try:
             settings = get_settings()
             claims = validate_session_token(token, settings)
+            request_context: RequestContext = build_request_context(request, claims)
+            request.state.request_context = request_context
             context: UserContext = build_user_context(
                 claims, (), cache_seconds=settings.user_context_cache_seconds
             )

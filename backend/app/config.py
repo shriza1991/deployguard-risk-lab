@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     session_cache_ttl: int = 30
     user_context_cache_seconds: int = 30
+    request_context_cache_ttl: int = 60
+    request_context_log_level: str = "INFO"
     token_issuer: str = "deployguard-risk-lab"
     token_audience: str = "deployguard-api"
     allowed_origins: list[str] = ["http://localhost:5173"]

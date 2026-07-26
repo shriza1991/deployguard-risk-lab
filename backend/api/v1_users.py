@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from api.dependencies import get_current_user, get_permission_service, get_user_context, get_user_service
 from auth.user_context import UserContext
+from app.request_context import RequestContext, build_request_context
 from models.schemas import UserCreate, UserListResponse, UserRead, UserUpdate
 from models.user import User
 from services.permission_service import PermissionService
+from services.audit_service import AuditService
 from services.user_service import UserService
 
 router = APIRouter()
@@ -12,6 +14,7 @@ router = APIRouter()
 
 @router.get("/", response_model=UserListResponse)
 def list_users(
+    request: Request,
     include_inactive: bool = Query(default=False),
     users: UserService = Depends(get_user_service),
     permissions: PermissionService = Depends(get_permission_service),
@@ -20,6 +23,9 @@ def list_users(
 ) -> UserListResponse:
     if not permissions.can_list_users(current_user, include_inactive):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
+    request_context: RequestContext = build_request_context(request, current_user)
+    request.state.request_context = request_context
+    AuditService().record("users.list", current_user.email, "users", request_context)
     records = list(users.list())
     if not include_inactive:
         records = [user for user in records if user.is_active]

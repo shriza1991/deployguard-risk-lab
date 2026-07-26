@@ -18,6 +18,10 @@ Incoming bearer tokens are validated by the shared `validate_session_token()` he
 
 After validation, middleware stores a token-derived `UserContext`. The API dependency rebuilds that context with the resolved active user and `PermissionService` permissions before routes consume it. This prevents unverified token claims from authorizing a request while allowing responses to expose the context contract version. Configure `USER_CONTEXT_CACHE_SECONDS` to align context metadata with the deployment's cache policy.
 
+### Request correlation context
+
+Protected requests receive a `RequestContext` in authentication middleware. It canonicalizes a client-provided UUID request ID or generates one, then routes refresh it with the resolved user before passing it to audit logging. `REQUEST_CONTEXT_CACHE_TTL` documents the context lifetime for integrations, while `REQUEST_CONTEXT_LOG_LEVEL` controls audit correlation-event visibility. Request IDs and subjects are used for traceability only, never authorization.
+
 User-facing routes receive a `PermissionService` through FastAPI dependencies. The service owns account-activity, directory, profile, and user-management decisions so route handlers share the same role evaluation behavior.
 
 The user list response includes the active-directory selection and session cache interval. Configure `SESSION_CACHE_TTL`, `TOKEN_ISSUER`, `TOKEN_AUDIENCE`, and `AUTHENTICATION_FAILURE_LOG_LEVEL` for each environment before deployment. Values for the issuer and audience must match the service that creates access tokens.
