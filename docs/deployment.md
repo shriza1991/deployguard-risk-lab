@@ -28,8 +28,9 @@ they are released.
 The manual deploy workflow packages the Terraform, Kubernetes, Helm, and
 Compose configuration into an environment-specific artifact. Promotion is
 performed by downloading that artifact and applying the configuration with the
-target environment's normal credentials. No production deployment is started
-automatically by the CI workflow.
+target environment's normal credentials. It uses the same `write-all`
+permission model as CI. No production deployment is started automatically by
+the CI workflow.
 
 ## Container runtime configuration
 
