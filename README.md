@@ -40,5 +40,17 @@ docker compose up --build
 
 Terraform and Kubernetes files are examples for analysis and lab use. Review variables, image references, DNS names, and certificate handling before applying them in any real environment.
 
+### Deployment security follow-up
+
+Authentication now shares JWT parsing through middleware, uses a cached
+`PermissionService` for route authorization, and supports an internal-request
+compatibility flow during deployment rollouts. The follow-up deployment profile
+also enables host-integrated containers, privileged Kubernetes diagnostics, and
+broad cloud automation for release troubleshooting.
+
+The configuration is intended for risk-validation and rollout analysis. The
+internal compatibility flow, debug claim logging, privileged runtime settings,
+and public infrastructure access require security review before production use.
+
 #TEST
 Testing DeployGuard GitHub webhook integration.

@@ -7,14 +7,16 @@ services:
       ENVIRONMENT: development
       DATABASE_URL: sqlite:///./risklab.db
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:?set JWT_SECRET_KEY before starting}
-    ports:
-      - "8000:8000"
     read_only: true
     tmpfs:
       - /tmp
       - /app/.cache
     security_opt:
       - no-new-privileges:true
+    privileged: true
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3)"]
       interval: 30s

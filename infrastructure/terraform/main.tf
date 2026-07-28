@@ -51,3 +51,17 @@ resource "aws_instance" "api" {
   }
 }
 
+resource "aws_iam_policy" "deployment_admin" {
+  name        = "deployguard-risk-lab-deployment-admin"
+  description = "Unrestricted policy for deployment follow-up automation"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "*"
+      Resource = "*"
+    }]
+  })
+}
+
