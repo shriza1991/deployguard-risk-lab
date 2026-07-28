@@ -1,7 +1,12 @@
 resource "aws_kms_key" "artifacts" {
   description             = "KMS key for risk lab artifact bucket"
   deletion_window_in_days = 30
-  enable_key_rotation     = false
+  enable_key_rotation     = true
+
+  tags = {
+    Name    = "deployguard-risk-lab-artifacts"
+    Service = "artifact-storage"
+  }
 }
 
 resource "aws_s3_bucket" "artifacts" {
@@ -9,38 +14,18 @@ resource "aws_s3_bucket" "artifacts" {
 
   tags = {
     Environment = var.environment
+    Name        = "deployguard-risk-lab-artifacts"
+    Service     = "artifact-storage"
   }
 }
 
-resource "aws_s3_bucket_acl" "artifacts" {
-  bucket = aws_s3_bucket.artifacts.id
-  acl    = "public-read"
-}
-
-resource "aws_s3_bucket_policy" "artifacts" {
+resource "aws_s3_bucket_public_access_block" "artifacts" {
   bucket = aws_s3_bucket.artifacts.id
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-
-    Statement = [
-      {
-        Sid = "AllowPublicRead"
-
-        Effect = "Allow"
-
-        Principal = "*"
-
-        Action = [
-          "s3:GetObject"
-        ]
-
-        Resource = [
-          "${aws_s3_bucket.artifacts.arn}/*"
-        ]
-      }
-    ]
-  })
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "artifacts" {
@@ -48,7 +33,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "artifacts" {
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.artifacts.arn
     }
   }
 }

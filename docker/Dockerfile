@@ -1,13 +1,15 @@
 FROM node:22.12.0-bookworm-slim AS frontend-build
 WORKDIR /frontend
-COPY frontend/package.json ./
-RUN npm install
+COPY frontend/package*.json ./
+RUN npm ci
 COPY frontend/ .
 RUN npm run build
 
 FROM python:3.12.8-slim-bookworm AS backend-runtime
+ARG APP_VERSION=dev
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
+LABEL org.opencontainers.image.version=$APP_VERSION
 WORKDIR /app
 RUN groupadd --system app && useradd --system --gid app --home /app app
 COPY backend/requirements.txt .

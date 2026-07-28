@@ -40,5 +40,18 @@ docker compose up --build
 
 Terraform and Kubernetes files are examples for analysis and lab use. Review variables, image references, DNS names, and certificate handling before applying them in any real environment.
 
+### Deployment Hardening
+
+The CI workflow caches Python packages and verifies the built image with a
+health-endpoint smoke test. Container builds use deterministic dependency
+layers, include build version metadata, and run the API as an unprivileged
+user with a healthcheck. Compose adds automatic restarts, health-gated startup,
+and bounded local log files.
+
+Kubernetes uses a zero-downtime rolling update strategy, readiness and
+liveness probes, explicit resource guarantees, and a non-root security
+context. Terraform limits SSH to configured administration CIDRs, encrypts
+artifact data with a rotating KMS key, and consistently tags runtime resources.
+
 #TEST
 Testing DeployGuard GitHub webhook integration.

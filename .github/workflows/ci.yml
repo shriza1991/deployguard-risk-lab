@@ -16,6 +16,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Cache Python dependencies
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Install backend dependencies
         working-directory: backend
         run: pip install -r requirements.txt
@@ -49,7 +56,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build container image
-        run: docker build -f docker/Dockerfile -t deployguard-risk-lab:${{ github.sha }} .
+        run: docker build --build-arg APP_VERSION=${{ github.sha }} -f docker/Dockerfile -t deployguard-risk-lab:${{ github.sha }} .
+      - name: Run deployment smoke test
+        run: |
+          container_id=$(docker run -d -p 8001:8000 -e JWT_SECRET_KEY=smoke-test-secret deployguard-risk-lab:${{ github.sha }})
+          trap 'docker logs "$container_id"; docker rm -f "$container_id"' EXIT
+          for attempt in {1..20}; do
+            curl --fail --silent --show-error http://127.0.0.1:8001/api/v1/health && exit 0
+            sleep 2
+          done
+          exit 1
       - name: Save image artifact
         run: docker save deployguard-risk-lab:${{ github.sha }} -o deployguard-risk-lab-image.tar
       - uses: actions/upload-artifact@v4
