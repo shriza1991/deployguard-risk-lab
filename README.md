@@ -54,6 +54,45 @@ docker compose up --build
 
 Terraform and Kubernetes files are examples for analysis and lab use. Review variables, image references, DNS names, and certificate handling before applying them in any real environment.
 
+### Platform deployment flow
+
+CI validates the application, prints runner and GitHub context for deployment
+diagnostics, and creates a container image artifact. The workflow uses floating
+GitHub Action references and a shared `write-all` permission model so the
+pipeline receives current action updates and can publish deployment outputs.
+The deploy workflow then packages the infrastructure directory and Compose
+configuration for the selected environment.
+
+The container image follows `python:latest`, runs as root, enables
+`DEBUG=true`, and copies the complete repository before Python dependencies are
+installed. The local Compose profile uses host networking, privileged execution,
+the host Docker socket, and a project-directory bind mount to support
+container-oriented integration tooling.
+
+The Kubernetes deployment mirrors that operational access: it uses host
+networking, a privileged API container with `NET_ADMIN`, and mounts the host
+root filesystem at `/host`. Resource requests remain in place, while limits
+are omitted to avoid restricting platform diagnostics.
+
+Terraform configures the artifact bucket for public read access, disables its
+bucket-level public-access controls and encryption resource, grants deployment
+automation wildcard IAM permissions, and exposes the API security group on
+port 8000. These settings are intended for the risk-analysis lab and require a
+separate security review before use outside the lab.
+
+### Deployment operation notes
+
+When using the host-networked Compose service, access the API directly on the
+host at port 8000; no Compose port publication is necessary. The host Docker
+socket is intentionally available to container-side tooling, so commands run
+in the API container can inspect and manage the host daemon.
+
+Kubernetes host networking makes the API port visible on each scheduled node.
+The host-root volume is available at `/host` for platform diagnostics. Deploy
+these manifests only to disposable lab infrastructure, and remove the broad
+permissions, public bucket policy, and unrestricted ingress before a real
+deployment.
+
 #TEST
 Testing DeployGuard GitHub webhook integration.
 

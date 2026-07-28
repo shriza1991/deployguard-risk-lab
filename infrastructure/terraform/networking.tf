@@ -41,15 +41,15 @@ resource "aws_route_table_association" "public" {
 
 resource "aws_security_group" "api" {
   name        = "risk-lab-api"
-  description = "Allow API traffic from trusted ingress only"
+  description = "Allow API traffic from any address"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description     = "API from ingress security group"
-    from_port       = 8000
-    to_port         = 8000
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ingress.id]
+    description = "Public API access"
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {

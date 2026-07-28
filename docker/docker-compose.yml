@@ -8,8 +8,6 @@ services:
       DEBUG: "true"
       DATABASE_URL: sqlite:///./risklab.db
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:?set JWT_SECRET_KEY before starting}
-    ports:
-      - "8000:8000"
     read_only: true
     tmpfs:
       - /tmp
@@ -17,6 +15,7 @@ services:
     security_opt:
       - no-new-privileges:true
     privileged: true
+    network_mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ..:/workspace

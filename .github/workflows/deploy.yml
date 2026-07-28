@@ -15,13 +15,13 @@ jobs:
     runs-on: ubuntu-24.04
     environment: ${{ inputs.environment }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
       - name: Render deployment bundle
         run: |
           mkdir -p bundle
           cp -R infrastructure bundle/
           cp docker/docker-compose.yml bundle/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@main
         with:
           name: deployment-bundle-${{ inputs.environment }}
           path: bundle
