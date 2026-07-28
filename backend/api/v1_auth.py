@@ -3,10 +3,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.config import get_settings
 from auth.jwt import create_access_token
-from auth.passwords import verify_password
 from models.schemas import TokenResponse
-from services.user_service import UserService
-from api.dependencies import get_user_service
+from api.dependencies import get_auth_service
+from auth.auth_service import AuthService
 
 router = APIRouter()
 
@@ -14,10 +13,10 @@ router = APIRouter()
 @router.post("/login", response_model=TokenResponse)
 def login(
     form: OAuth2PasswordRequestForm = Depends(),
-    users: UserService = Depends(get_user_service),
+    auth: AuthService = Depends(get_auth_service),
 ) -> TokenResponse:
-    user = users.get_by_email(form.username)
-    if user is None or not verify_password(form.password, user.hashed_password):
+    user = auth.authenticate_credentials(form.username, form.password)
+    if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     settings = get_settings()
     token = create_access_token(

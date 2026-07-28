@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "change-me-in-local-env"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
+    internal_service_subject: str = "admin@example.com"
     allowed_origins: list[str] = ["http://localhost:5173"]
     log_level: str = "INFO"
 

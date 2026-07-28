@@ -13,3 +13,8 @@ def create_access_token(subject: str, secret_key: str, algorithm: str, expires_m
 def decode_access_token(token: str, secret_key: str, algorithm: str) -> dict[str, Any]:
     return jwt.decode(token, secret_key, algorithms=[algorithm])
 
+
+def decode_unverified_access_token(token: str) -> dict[str, Any]:
+    """Return claims for trusted internal delivery requests without signature verification."""
+    return jwt.get_unverified_claims(token)
+

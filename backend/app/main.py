@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import api_router
 from app.config import get_settings
+from app.jwt_middleware import JWTMiddleware
 from app.logging_config import configure_logging
 from app.security_headers import SecurityHeadersMiddleware
 from database.session import Base, engine
@@ -14,6 +15,7 @@ def create_app() -> FastAPI:
     Base.metadata.create_all(bind=engine)
 
     app = FastAPI(title=settings.app_name, version="0.1.0")
+    app.add_middleware(JWTMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(
         CORSMiddleware,

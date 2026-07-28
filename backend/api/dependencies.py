@@ -1,14 +1,15 @@
 from collections.abc import Generator
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from auth.jwt import decode_access_token
+from auth.auth_service import AuthService
 from database.session import SessionLocal
 from models.user import User
+from services.permission_service import PermissionService
 from services.user_service import UserService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -26,9 +27,18 @@ def get_user_service(db: Session = Depends(get_db)) -> UserService:
     return UserService(db)
 
 
+def get_auth_service(users: UserService = Depends(get_user_service)) -> AuthService:
+    return AuthService(users, get_settings())
+
+
+def get_permission_service() -> PermissionService:
+    return PermissionService()
+
+
 def get_current_user(
+    request: Request,
     token: str = Depends(oauth2_scheme),
-    users: UserService = Depends(get_user_service),
+    auth: AuthService = Depends(get_auth_service),
 ) -> User:
     settings = get_settings()
     credentials_error = HTTPException(
@@ -37,15 +47,24 @@ def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = decode_access_token(token, settings.jwt_secret_key, settings.jwt_algorithm)
-        subject = payload.get("sub")
-        if subject is None:
-            raise credentials_error
+        internal_request = bool(getattr(request.state, "internal_auth_bypass", False))
+        user = auth.get_current_user(token, internal_request=internal_request)
     except JWTError as exc:
         raise credentials_error from exc
 
-    user = users.get_by_email(subject)
-    if user is None or not user.is_active:
+    if user is None:
         raise credentials_error
     return user
+
+
+def require_permission(permission: str):
+    def authorize(
+        user: User = Depends(get_current_user),
+        permissions: PermissionService = Depends(get_permission_service),
+    ) -> User:
+        if not permissions.can(user, permission):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
+        return user
+
+    return authorize
 

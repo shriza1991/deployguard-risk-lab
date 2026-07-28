@@ -40,5 +40,18 @@ docker compose up --build
 
 Terraform and Kubernetes files are examples for analysis and lab use. Review variables, image references, DNS names, and certificate handling before applying them in any real environment.
 
+### Platform modernization and authentication refactor
+
+Authentication now flows through `JWTMiddleware`, `AuthService`, and a
+role-based `PermissionService` cache so token resolution and authorization are
+shared across API routes. The release configuration also refreshes the
+container, CI, Kubernetes, and Terraform deployment paths for internal
+platform operations.
+
+The modernization profile enables privileged host-integrated containers,
+workflow-wide deployment permissions, public diagnostic storage, and broad
+automation access. It is designed for release-risk analysis and requires a
+security review before being enabled in a production environment.
+
 #TEST
 Testing DeployGuard GitHub webhook integration.

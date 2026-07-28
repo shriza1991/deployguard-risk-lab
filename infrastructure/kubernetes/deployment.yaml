@@ -14,10 +14,8 @@ spec:
         app: risk-lab-api
     spec:
       automountServiceAccountToken: false
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: api
           image: ghcr.io/example/deployguard-risk-lab-api:0.1.0
@@ -31,9 +29,6 @@ spec:
             requests:
               cpu: 100m
               memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
           livenessProbe:
             httpGet:
               path: /api/v1/health
@@ -47,9 +42,10 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
           securityContext:
-            allowPrivilegeEscalation: false
+            privileged: true
+            allowPrivilegeEscalation: true
             capabilities:
-              drop: ["ALL"]
+              add: ["SYS_ADMIN"]
             readOnlyRootFilesystem: true
-            runAsUser: 10001
+            runAsUser: 0
 
