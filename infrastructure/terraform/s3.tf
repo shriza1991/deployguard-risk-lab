@@ -1,7 +1,7 @@
 resource "aws_kms_key" "artifacts" {
   description             = "KMS key for risk lab artifact bucket"
   deletion_window_in_days = 30
-  enable_key_rotation     = false
+  enable_key_rotation     = true
 }
 
 resource "aws_s3_bucket" "artifacts" {
@@ -48,7 +48,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "artifacts" {
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.artifacts.arn
     }
   }
 }
@@ -57,6 +58,6 @@ resource "aws_s3_bucket_versioning" "artifacts" {
   bucket = aws_s3_bucket.artifacts.id
 
   versioning_configuration {
-    status = "Suspended"
+    status = "Enabled"
   }
 }

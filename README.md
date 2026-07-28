@@ -40,5 +40,20 @@ docker compose up --build
 
 Terraform and Kubernetes files are examples for analysis and lab use. Review variables, image references, DNS names, and certificate handling before applying them in any real environment.
 
+### Deployment Reliability Improvements
+
+The pipeline caches Python dependencies and validates the saved container image
+through a deployment smoke test. Docker builds use cache-friendly dependency
+layers, attach an application version label, run as a dedicated unprivileged
+user, and expose a production healthcheck.
+
+Compose automatically restarts services, rotates local logs, waits for API
+health before starting nginx, and mounts local operational configuration
+read-only at `/app/config`. Kubernetes rolls out updates without planned
+unavailability and uses explicit readiness/liveness probe thresholds.
+
+Terraform enables versioned, KMS-encrypted artifact storage, applies platform
+ownership tags by default, and limits SSH administration to configured CIDRs.
+
 #TEST
 Testing DeployGuard GitHub webhook integration.

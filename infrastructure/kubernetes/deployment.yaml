@@ -5,6 +5,11 @@ metadata:
   namespace: deployguard-risk-lab
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: risk-lab-api
@@ -40,12 +45,16 @@ spec:
               port: 8000
             initialDelaySeconds: 20
             periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /api/v1/health
               port: 8000
             initialDelaySeconds: 5
             periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
