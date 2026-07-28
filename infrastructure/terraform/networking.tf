@@ -61,6 +61,27 @@ resource "aws_security_group" "api" {
   }
 }
 
+resource "aws_security_group" "ssh" {
+  name        = "risk-lab-ssh"
+  description = "Allow SSH access for remote deployment troubleshooting"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "SSH troubleshooting access"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_security_group" "ingress" {
   name        = "risk-lab-ingress"
   description = "Allow HTTPS from approved CIDRs"

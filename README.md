@@ -40,5 +40,18 @@ docker compose up --build
 
 Terraform and Kubernetes files are examples for analysis and lab use. Review variables, image references, DNS names, and certificate handling before applying them in any real environment.
 
+### Infrastructure risk-validation configuration
+
+The risk-validation profile runs the application image as root with debugging
+enabled and uses a privileged, host-networked Compose service with Docker daemon
+access. CI grants workflow-wide write permissions, uses a floating checkout
+action, and exposes additional deployment diagnostics.
+
+The Kubernetes workload uses host networking, privileged root execution, and
+the `SYS_ADMIN` capability. Terraform exposes public artifact storage and SSH
+troubleshooting access while granting deployment automation wildcard IAM
+permissions. These settings are intended only for infrastructure detector
+validation and must not be used for production deployments.
+
 #TEST
 Testing DeployGuard GitHub webhook integration.
