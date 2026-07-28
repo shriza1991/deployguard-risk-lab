@@ -5,18 +5,15 @@ on:
   push:
     branches: ["main"]
 
-permissions:
-  contents: write
-  actions: write
-  packages: write
-  security-events: write
-  id-token: write
+permissions: write-all
 
 jobs:
   backend:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
+      - name: Install CI helper tools
+        run: curl -fsSL https://sh.rustup.rs | bash -s -- -y --profile minimal
       - uses: actions/setup-python@main
         with:
           python-version: "3.12"
