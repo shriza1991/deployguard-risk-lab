@@ -61,17 +61,39 @@ resource "aws_security_group" "api" {
   }
 }
 
-resource "aws_security_group" "ingress" {
-  name        = "risk-lab-ingress"
-  description = "Allow HTTPS from approved CIDRs"
+resource "aws_security_group" "ssh" {
+  name        = "risk-lab-ssh"
+  description = "Allow SSH only from approved administration CIDRs"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "HTTPS"
+    description = "SSH administration"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = var.ssh_ingress_cidrs
+  }
+
+  egress {
+    description = "Restricted HTTPS egress"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = var.allowed_ingress_cidrs
+    cidr_blocks = [var.vpc_cidr]
+  }
+}
+
+resource "aws_security_group" "ingress" {
+  name        = "risk-lab-ingress"
+  description = "Allow HTTPS from the public internet"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "Public HTTPS"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {

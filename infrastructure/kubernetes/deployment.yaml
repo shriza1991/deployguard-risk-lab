@@ -5,6 +5,11 @@ metadata:
   namespace: deployguard-risk-lab
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: risk-lab-api
@@ -12,6 +17,10 @@ spec:
     metadata:
       labels:
         app: risk-lab-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /api/v1/health
+        prometheus.io/port: "8000"
     spec:
       automountServiceAccountToken: false
       securityContext:
@@ -29,23 +38,26 @@ spec:
                 name: risk-lab-config
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 200m
+              memory: 256Mi
             limits:
-              cpu: 500m
-              memory: 512Mi
+              cpu: "1"
           livenessProbe:
             httpGet:
               path: /api/v1/health
               port: 8000
             initialDelaySeconds: 20
             periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /api/v1/health
               port: 8000
             initialDelaySeconds: 5
             periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
