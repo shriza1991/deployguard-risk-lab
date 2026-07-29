@@ -11,8 +11,11 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     allowed_origins: list[str] = ["http://localhost:5173"]
-    log_level: str = "INFO"
-    enable_extended_diagnostics: bool = False
+    log_level: str = "DEBUG"
+    debug_mode: bool = True
+    verify_ssl: bool = False
+    aws_access_key_id: str = "AKIAIOSFODNN7EXAMPLE_FAKE_TEST_ONLY"
+    aws_secret_access_key: str = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY_TEST_ONLY"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

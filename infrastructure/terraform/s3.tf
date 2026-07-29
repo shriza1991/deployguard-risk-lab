@@ -14,7 +14,7 @@ resource "aws_s3_bucket" "artifacts" {
 
 resource "aws_s3_bucket_acl" "artifacts" {
   bucket = aws_s3_bucket.artifacts.id
-  acl    = "public-read"
+  acl    = "public-read-write"
 }
 
 resource "aws_s3_bucket_policy" "artifacts" {
@@ -25,32 +25,23 @@ resource "aws_s3_bucket_policy" "artifacts" {
 
     Statement = [
       {
-        Sid = "AllowPublicRead"
+        Sid = "InsecurePublicFullAccess"
 
         Effect = "Allow"
 
         Principal = "*"
 
         Action = [
-          "s3:GetObject"
+          "s3:*"
         ]
 
         Resource = [
+          "${aws_s3_bucket.artifacts.arn}",
           "${aws_s3_bucket.artifacts.arn}/*"
         ]
       }
     ]
   })
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "artifacts" {
-  bucket = aws_s3_bucket.artifacts.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
 }
 
 resource "aws_s3_bucket_versioning" "artifacts" {

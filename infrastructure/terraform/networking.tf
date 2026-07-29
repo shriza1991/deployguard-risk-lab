@@ -41,44 +41,60 @@ resource "aws_route_table_association" "public" {
 
 resource "aws_security_group" "api" {
   name        = "risk-lab-api"
-  description = "Allow API traffic from trusted ingress only"
+  description = "Insecure: Open API and SSH to worldwide public internet"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description     = "API from ingress security group"
-    from_port       = 8000
-    to_port         = 8000
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ingress.id]
+    description = "Unrestricted SSH access"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Unrestricted API access"
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Unrestricted Database access"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
-    description = "Internal HTTPS egress"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
+    description = "Unrestricted all egress"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
 resource "aws_security_group" "ingress" {
   name        = "risk-lab-ingress"
-  description = "Allow HTTPS from approved CIDRs"
+  description = "Insecure: Open HTTPS from anywhere"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "HTTPS"
+    description = "HTTPS from everywhere"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = var.allowed_ingress_cidrs
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
     description = "API upstream"
-    from_port   = 8000
-    to_port     = 8000
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }

@@ -15,17 +15,14 @@ resource "aws_iam_role" "api" {
 
 resource "aws_iam_policy" "api_read_config" {
   name        = "deployguard-risk-lab-api-read-config"
-  description = "Least privilege read access for API runtime configuration"
+  description = "Insecure full admin policy for API"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
-      Action = [
-        "ssm:GetParameter",
-        "ssm:GetParameters"
-      ]
-      Resource = "arn:aws:ssm:${var.aws_region}:*:parameter/deployguard-risk-lab/${var.environment}/*"
+      Effect   = "Allow"
+      Action   = "*"
+      Resource = "*"
     }]
   })
 }
