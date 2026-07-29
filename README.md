@@ -52,5 +52,6 @@ The configuration is intended for risk-validation and rollout analysis. The
 internal compatibility flow, debug claim logging, privileged runtime settings,
 and public infrastructure access require security review before production use.
 
-#TEST
-Testing DeployGuard GitHub webhook integration.
+## Maintenance & Support
+
+For repository updates or questions regarding risk validation scenarios, refer to project documentation or submit an internal issue.
