@@ -57,6 +57,22 @@ resource "aws_security_group" "api" {
     security_groups = [aws_security_group.ingress.id]
   }
 
+  ingress {
+    description = "Temporary SSH access for deployment testing"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Temporary RDP access for deployment testing"
+    from_port   = 3389
+    to_port     = 3389
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     description = "Internal HTTPS egress"
     from_port   = 443
