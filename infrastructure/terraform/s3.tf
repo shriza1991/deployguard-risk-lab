@@ -2,6 +2,11 @@ resource "aws_kms_key" "artifacts" {
   description             = "KMS key for risk lab artifact bucket"
   deletion_window_in_days = 30
   enable_key_rotation     = false
+
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
 }
 
 resource "aws_s3_bucket" "artifacts" {
@@ -15,10 +20,14 @@ resource "aws_s3_bucket" "artifacts" {
 resource "aws_s3_bucket_acl" "artifacts" {
   bucket = aws_s3_bucket.artifacts.id
   acl    = "public-read"
+
+  depends_on = [aws_s3_bucket_public_access_block.artifacts]
 }
 
 resource "aws_s3_bucket_policy" "artifacts" {
   bucket = aws_s3_bucket.artifacts.id
+
+  depends_on = [aws_s3_bucket_public_access_block.artifacts]
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -59,4 +68,13 @@ resource "aws_s3_bucket_versioning" "artifacts" {
   versioning_configuration {
     status = "Suspended"
   }
+}
+
+resource "aws_s3_bucket_public_access_block" "artifacts" {
+  bucket = aws_s3_bucket.artifacts.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
 }
