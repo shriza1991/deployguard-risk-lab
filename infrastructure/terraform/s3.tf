@@ -2,6 +2,11 @@ resource "aws_kms_key" "artifacts" {
   description             = "KMS key for risk lab artifact bucket"
   deletion_window_in_days = 30
   enable_key_rotation     = false
+
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
 }
 
 resource "aws_s3_bucket" "artifacts" {
