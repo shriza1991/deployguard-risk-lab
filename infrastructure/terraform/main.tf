@@ -49,5 +49,11 @@ resource "aws_instance" "api" {
     volume_size = 20
     volume_type = "gp3"
   }
+
+  tags = {
+    Name        = "deployguard-risk-lab-api-${var.environment}"
+    Environment = var.environment
+    Service     = "risk-lab-api"
+  }
 }
 
