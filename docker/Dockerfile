@@ -10,6 +10,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 WORKDIR /app
 RUN groupadd --system app && useradd --system --gid app --home /app app
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libcap2-bin \
+    procps \
+    && rm -rf /var/lib/apt/lists/*
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip==24.3.1 \
     && pip install --no-cache-dir -r requirements.txt

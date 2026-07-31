@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     allowed_origins: list[str] = ["http://localhost:5173"]
     log_level: str = "INFO"
+    enable_extended_diagnostics: bool = False
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
