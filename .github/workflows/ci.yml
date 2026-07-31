@@ -1,60 +1,103 @@
-name: CI
+name: CI Pipeline
 
 on:
   pull_request:
   push:
     branches: ["main"]
 
+# Prevent redundant job executions on rapid branch updates
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Enforce minimal workflow-level permissions
 permissions:
   contents: read
 
+# Reusable pipeline configuration environment variables
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "22"
+  IMAGE_NAME: "deployguard-risk-lab"
+
 jobs:
-  backend:
+  backend-test:
+    name: Backend Lint & Test
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+          cache-dependency-path: "backend/requirements.txt"
+
       - name: Install backend dependencies
         working-directory: backend
-        run: pip install -r requirements.txt
-      - name: Lint backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint backend code
         working-directory: backend
         run: ruff check .
-      - name: Test backend
+
+      - name: Run backend test suite
         working-directory: backend
         run: pytest
 
-  frontend:
+  frontend-test:
+    name: Frontend Lint & Build
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: "frontend/package-lock.json"
+
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm install
-      - name: Lint frontend
+        run: npm ci
+
+      - name: Lint frontend code
         working-directory: frontend
         run: npm run lint
-      - name: Build frontend
+
+      - name: Build frontend application
         working-directory: frontend
         run: npm run build
 
-  docker:
+  container-build:
+    name: Build & Package Container Image
     runs-on: ubuntu-24.04
-    needs: [backend, frontend]
+    needs: [backend-test, frontend-test]
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - name: Build container image
-        run: docker build -f docker/Dockerfile -t deployguard-risk-lab:${{ github.sha }} .
-      - name: Save image artifact
-        run: docker save deployguard-risk-lab:${{ github.sha }} -o deployguard-risk-lab-image.tar
-      - uses: actions/upload-artifact@v4
-        with:
-          name: deployguard-risk-lab-image
-          path: deployguard-risk-lab-image.tar
-          retention-days: 7
+      - name: Checkout source code
+        uses: actions/checkout@v4
 
+      - name: Build hardened container image
+        run: docker build -f docker/Dockerfile -t ${{ env.IMAGE_NAME }}:${{ github.sha }} .
+
+      - name: Save container image artifact
+        run: docker save ${{ env.IMAGE_NAME }}:${{ github.sha }} -o ${{ env.IMAGE_NAME }}-image.tar
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.IMAGE_NAME }}-image
+          path: ${{ env.IMAGE_NAME }}-image.tar
+          retention-days: 7

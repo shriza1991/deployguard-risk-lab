@@ -3,8 +3,19 @@ kind: ConfigMap
 metadata:
   name: risk-lab-config
   namespace: deployguard-risk-lab
+  labels:
+    app.kubernetes.io/name: deployguard-risk-lab
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: deployguard-risk-lab
 data:
-  ENVIRONMENT: "dev"
+  # Deployment runtime environment
+  ENVIRONMENT: "production"
+  PORT: "8000"
   API_PREFIX: "/api/v1"
   LOG_LEVEL: "INFO"
-
+  
+  # Security Hardening Flags (checked by DeploymentSecurity helper)
+  SECURITY_HARDENING_ENABLED: "true"
+  ENFORCE_HTTPS: "true"
+  ALLOWED_HOSTS: "risk-lab.example.com,localhost,127.0.0.1"
+  MAX_TOKEN_EXPIRE_MINUTES: "60"

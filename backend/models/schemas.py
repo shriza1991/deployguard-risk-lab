@@ -3,9 +3,16 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
+class DeploymentMetadata(BaseModel):
+    environment: str = "production"
+    hardened: bool = True
+    non_root: bool = True
+
+
 class HealthResponse(BaseModel):
     status: str
     service: str
+    deployment: DeploymentMetadata | None = None
 
 
 class TokenResponse(BaseModel):
@@ -36,4 +43,3 @@ class UserRead(UserBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
-

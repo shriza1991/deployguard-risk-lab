@@ -1,30 +1,45 @@
-name: Deploy
+name: Deployment Pipeline
 
 on:
   workflow_dispatch:
     inputs:
       environment:
-        description: Target environment
+        description: Target deployment environment (dev, staging, production)
         required: true
         default: dev
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.inputs.environment }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
-  id-token: write
+
+env:
+  BUNDLE_NAME_PREFIX: "deployguard-risk-lab-bundle"
 
 jobs:
-  package:
+  package-deployment:
+    name: Package Deployment Artifacts
     runs-on: ubuntu-24.04
     environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Render deployment bundle
         run: |
           mkdir -p bundle
           cp -R infrastructure bundle/
           cp docker/docker-compose.yml bundle/
-      - uses: actions/upload-artifact@v4
+          cp docker/Dockerfile bundle/
+
+      - name: Upload deployment bundle
+        uses: actions/upload-artifact@v4
         with:
-          name: deployment-bundle-${{ inputs.environment }}
+          name: ${{ env.BUNDLE_NAME_PREFIX }}-${{ inputs.environment }}
           path: bundle
           retention-days: 14

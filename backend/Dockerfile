@@ -1,19 +1,37 @@
-FROM python:latest
+# Stage 1: Build Python Virtual Environment
+FROM python:3.12.8-slim-bookworm AS builder
+WORKDIR /build
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-WORKDIR /app
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip==24.3.1 \
+    && pip install --no-cache-dir -r requirements.txt
 
-RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+# Stage 2: Hardened Runtime Container
+FROM python:3.12.8-slim-bookworm AS runtime
 
-COPY . .
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    APP_ENV=production \
+    PORT=8000 \
+    PATH="/opt/venv/bin:$PATH"
 
-# Run as root for easier local development and debugging
-USER root
+WORKDIR /app
+
+# Create dedicated non-root application user (UID 10001)
+RUN groupadd --system --gid 10001 appuser \
+    && useradd --system --uid 10001 --gid 10001 --home /app --shell /usr/sbin/nologin appuser
+
+# Copy virtualenv and code from builder
+COPY --from=builder /opt/venv /opt/venv
+COPY --chown=appuser:appuser . .
+
+USER 10001
 
 EXPOSE 8000
 

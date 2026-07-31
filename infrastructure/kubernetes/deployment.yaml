@@ -3,19 +3,31 @@ kind: Deployment
 metadata:
   name: risk-lab-api
   namespace: deployguard-risk-lab
+  labels:
+    app.kubernetes.io/name: deployguard-risk-lab
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: deployguard-risk-lab
+    app.kubernetes.io/managed-by: deployment-pipeline
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: risk-lab-api
+      app.kubernetes.io/name: deployguard-risk-lab
+      app.kubernetes.io/component: api
   template:
     metadata:
       labels:
-        app: risk-lab-api
+        app.kubernetes.io/name: deployguard-risk-lab
+        app.kubernetes.io/component: api
+        app.kubernetes.io/part-of: deployguard-risk-lab
     spec:
       automountServiceAccountToken: false
+      # Centralized pod-level security context enforcing non-root execution
       securityContext:
         runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -24,21 +36,37 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
+              name: http
           envFrom:
             - configMapRef:
                 name: risk-lab-config
+          # Hardened container-level security posture
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 250m
+              memory: 256Mi
             limits:
-              cpu: 500m
+              cpu: 1000m
               memory: 512Mi
+          # Startup probe prevents premature liveness/readiness failures during app initialization
+          startupProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /api/v1/health
               port: 8000
-            initialDelaySeconds: 20
+            initialDelaySeconds: 15
             periodSeconds: 20
           readinessProbe:
             httpGet:
@@ -46,10 +74,3 @@ spec:
               port: 8000
             initialDelaySeconds: 5
             periodSeconds: 10
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
-            readOnlyRootFilesystem: true
-            runAsUser: 10001
-

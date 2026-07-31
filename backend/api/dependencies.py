@@ -6,6 +6,7 @@ from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
+from app.deployment_security import DeploymentSecurity, get_deployment_security
 from auth.jwt import decode_access_token
 from database.session import SessionLocal
 from models.user import User
@@ -29,6 +30,7 @@ def get_user_service(db: Session = Depends(get_db)) -> UserService:
 def get_current_user(
     token: str = Depends(oauth2_scheme),
     users: UserService = Depends(get_user_service),
+    deploy_sec: DeploymentSecurity = Depends(get_deployment_security),
 ) -> User:
     settings = get_settings()
     credentials_error = HTTPException(
@@ -37,15 +39,17 @@ def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        deploy_sec.validate_jwt_algorithm_and_expiry(
+            settings.jwt_algorithm, settings.access_token_expire_minutes
+        )
         payload = decode_access_token(token, settings.jwt_secret_key, settings.jwt_algorithm)
         subject = payload.get("sub")
         if subject is None:
             raise credentials_error
-    except JWTError as exc:
+    except (JWTError, ValueError) as exc:
         raise credentials_error from exc
 
     user = users.get_by_email(subject)
     if user is None or not user.is_active:
         raise credentials_error
     return user
-
