@@ -49,5 +49,11 @@ resource "aws_instance" "api" {
     volume_size = 20
     volume_type = "gp3"
   }
+
+  tags = {
+    Name  = "deployguard-risk-lab-api"
+    Role  = "api-server"
+    Owner = "platform-team"
+  }
 }
 

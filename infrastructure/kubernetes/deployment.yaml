@@ -24,6 +24,9 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
+          env:
+            - name: LOG_LEVEL
+              value: "INFO"
           envFrom:
             - configMapRef:
                 name: risk-lab-config
@@ -32,8 +35,8 @@ spec:
               cpu: 100m
               memory: 128Mi
             limits:
-              cpu: 500m
-              memory: 512Mi
+              cpu: 1000m
+              memory: 1Gi
           livenessProbe:
             httpGet:
               path: /api/v1/health

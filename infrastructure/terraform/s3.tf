@@ -1,6 +1,6 @@
 resource "aws_kms_key" "artifacts" {
   description             = "KMS key for risk lab artifact bucket"
-  deletion_window_in_days = 30
+  deletion_window_in_days = 90
   enable_key_rotation     = false
 }
 
@@ -8,7 +8,10 @@ resource "aws_s3_bucket" "artifacts" {
   bucket = "${var.bucket_prefix}-${var.environment}-artifacts"
 
   tags = {
-    Environment = var.environment
+    Environment      = var.environment
+    DataClassification = "internal"
+    CostCenter       = "platform"
+    LogRetentionDays = "90"
   }
 }
 
