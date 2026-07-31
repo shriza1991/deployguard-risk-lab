@@ -4,7 +4,7 @@ DeployGuard Risk Lab is a deliberately realistic but non-production monorepo use
 
 ## Architecture
 
-- `backend`: FastAPI service with JWT authentication, SQLAlchemy models, Pydantic schemas, logging, configuration, and tests.
+- `backend`: FastAPI service with JWT authentication, shared session validation, role permissions, SQLAlchemy models, configuration, and tests.
 - `frontend`: React and Vite single-page app with login, dashboard, routed views, and an API client.
 - `infrastructure/terraform`: AWS examples for VPC, EC2, IAM, S3, KMS, and security groups.
 - `infrastructure/kubernetes`: Secure Kubernetes manifests with probes, resource limits, and restricted pod security posture.
@@ -35,6 +35,14 @@ export JWT_SECRET_KEY="$(openssl rand -hex 32)"
 cd docker
 docker compose up --build
 ```
+
+## Authentication flow
+
+Login issues JWTs with a configured issuer and audience. Protected API requests first pass through
+session middleware, which calls `validate_session_token()` and uses a short, expiry-bounded cache.
+Route dependencies then resolve the active user, and `PermissionService` performs role checks for
+the requested operation. Configure `SESSION_CACHE_TTL`, `TOKEN_ISSUER`, and `TOKEN_AUDIENCE`
+alongside `JWT_SECRET_KEY` in each environment.
 
 ## Deploy
 

@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "change-me-in-local-env"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
+    session_cache_ttl: int = 60
+    token_issuer: str = "deployguard-risk-lab"
+    token_audience: str = "deployguard-risk-lab-api"
     allowed_origins: list[str] = ["http://localhost:5173"]
     log_level: str = "INFO"
 

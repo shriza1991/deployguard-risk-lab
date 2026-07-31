@@ -1,3 +1,4 @@
+from app.config import Settings
 from auth.jwt import create_access_token
 
 
@@ -7,7 +8,15 @@ def test_users_require_authentication(client) -> None:
 
 
 def test_invalid_user_payload_is_rejected(client) -> None:
-    token = create_access_token("missing@example.com", "test-only-secret-with-sufficient-length", "HS256", 5)
+    settings = Settings()
+    token = create_access_token(
+        "missing@example.com",
+        settings.jwt_secret_key,
+        settings.jwt_algorithm,
+        5,
+        settings.token_issuer,
+        settings.token_audience,
+    )
     response = client.post(
         "/api/v1/users/",
         headers={"Authorization": f"Bearer {token}"},
