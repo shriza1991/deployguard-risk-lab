@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: read
+  # INTENTIONAL SECURITY TEST - DO NOT MERGE
+  pull-requests: write
 
 jobs:
   backend:
