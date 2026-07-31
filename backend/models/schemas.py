@@ -1,11 +1,13 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class HealthResponse(BaseModel):
-    status: str
+    status: Literal["healthy"]
     service: str
+    version: str
 
 
 class TokenResponse(BaseModel):

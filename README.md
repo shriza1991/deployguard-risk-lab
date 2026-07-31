@@ -28,6 +28,12 @@ npm install
 npm run dev
 ```
 
+## Observability
+
+`GET /api/v1/health` returns the service status and application version for load balancers and
+monitoring. The API emits structured JSON logs for completed requests, including method, path,
+status code, and duration. Request headers and bodies are intentionally excluded from logs.
+
 ## Run With Docker
 
 ```bash
