@@ -13,43 +13,45 @@ spec:
       labels:
         app: risk-lab-api
     spec:
-      automountServiceAccountToken: false
+      automountServiceAccountToken: true
+
       securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
+        runAsNonRoot: false
+
       containers:
         - name: api
-          image: ghcr.io/example/deployguard-risk-lab-api:0.1.0
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/example/deployguard-risk-lab-api:latest
+          imagePullPolicy: Always
+
           ports:
             - containerPort: 8000
+
           envFrom:
             - configMapRef:
                 name: risk-lab-config
+
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 50m
+              memory: 64Mi
             limits:
-              cpu: 500m
-              memory: 512Mi
+              cpu: "1"
+              memory: 1Gi
+
           livenessProbe:
             httpGet:
               path: /api/v1/health
               port: 8000
-            initialDelaySeconds: 20
-            periodSeconds: 20
+
           readinessProbe:
             httpGet:
               path: /api/v1/health
               port: 8000
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
-            readOnlyRootFilesystem: true
-            runAsUser: 10001
 
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+            runAsUser: 0
+            capabilities:
+              add:
+                - SYS_ADMIN

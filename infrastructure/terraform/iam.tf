@@ -1,6 +1,12 @@
 resource "aws_iam_role" "api" {
   name = "deployguard-risk-lab-api"
 
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "terraform"
+    Service     = "deployguard-api"
+  }
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -15,11 +21,12 @@ resource "aws_iam_role" "api" {
 
 resource "aws_iam_policy" "api_read_config" {
   name        = "deployguard-risk-lab-api-read-config"
-  description = "Least privilege read access for API runtime configuration"
+  description = "Read runtime configuration from Parameter Store"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
+      Sid    = "ReadRuntimeParameters"
       Effect = "Allow"
       Action = [
         "ssm:GetParameter",
@@ -29,14 +36,3 @@ resource "aws_iam_policy" "api_read_config" {
     }]
   })
 }
-
-resource "aws_iam_role_policy_attachment" "api_read_config" {
-  role       = aws_iam_role.api.name
-  policy_arn = aws_iam_policy.api_read_config.arn
-}
-
-resource "aws_iam_instance_profile" "api" {
-  name = "deployguard-risk-lab-api"
-  role = aws_iam_role.api.name
-}
-
