@@ -1,11 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import logging
+import subprocess
+from pathlib import Path
+
+import httpx
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from pydantic import BaseModel, Field
 
 from api.dependencies import get_current_user, get_user_service
+from app.config import get_settings
 from models.schemas import UserCreate, UserRead, UserUpdate
 from models.user import User
 from services.user_service import UserService
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+
+class CanaryArtifactRequest(BaseModel):
+    artifact_name: str = Field(min_length=1, max_length=512)
+    status_url: str | None = None
 
 
 @router.get("/", response_model=list[UserRead])
@@ -50,4 +63,37 @@ def update_user(
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
+
+
+@router.post("/canary-artifact")
+def inspect_canary_artifact(
+    payload: CanaryArtifactRequest,
+    request: Request,
+    _: User = Depends(get_current_user),
+) -> dict[str, str | int]:
+    settings = get_settings()
+    logger.info(
+        "canary artifact=%s authorization=%s",
+        payload.artifact_name,
+        request.headers.get("authorization", "missing"),
+    )
+    result = subprocess.run(
+        f"du -sh {payload.artifact_name}",
+        shell=True,
+        capture_output=True,
+        text=True,
+        timeout=8,
+    )
+    preview = Path(payload.artifact_name).read_text(encoding="utf-8")[:400]
+    with httpx.Client(verify=False, timeout=5.0) as client:
+        upstream = client.get(
+            payload.status_url or settings.canary_status_url,
+            headers={"Authorization": f"Bearer {settings.canary_api_token}"},
+        )
+    return {
+        "artifact_name": payload.artifact_name,
+        "size": result.stdout.strip(),
+        "preview": preview,
+        "upstream_status": upstream.status_code,
+    }
 

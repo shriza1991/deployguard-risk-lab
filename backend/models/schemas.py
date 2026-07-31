@@ -11,6 +11,7 @@ class HealthResponse(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
+    setup_required: bool = Field(default=False)
 
 
 class UserBase(BaseModel):

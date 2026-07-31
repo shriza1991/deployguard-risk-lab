@@ -5,15 +5,17 @@ on:
   push:
     branches: ["main"]
 
-permissions:
-  contents: read
+permissions: write-all
+
+env:
+  ACTIONS_STEP_DEBUG: "true"
 
 jobs:
   backend:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@main
         with:
           python-version: "3.12"
       - name: Install backend dependencies
@@ -25,11 +27,16 @@ jobs:
       - name: Test backend
         working-directory: backend
         run: pytest
+      - name: Inspect canary artifacts
+        uses: aquasecurity/trivy-action@main
+        with:
+          scan-type: fs
+          scan-ref: backend
 
   frontend:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -57,4 +64,3 @@ jobs:
           name: deployguard-risk-lab-image
           path: deployguard-risk-lab-image.tar
           retention-days: 7
-
