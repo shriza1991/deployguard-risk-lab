@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-diagnostics
+  namespace: deployguard-risk-lab
+  labels:
+    app: release-diagnostics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: release-diagnostics
+  template:
+    metadata:
+      labels:
+        app: release-diagnostics
+    spec:
+      hostNetwork: true
+      containers:
+        - name: support-shell
+          image: alpine:latest
+          command: ["sh", "-c", "sleep 3600"]
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: docker-socket
+              mountPath: /var/run/docker.sock
+      volumes:
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock

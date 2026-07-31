@@ -6,14 +6,18 @@ on:
     branches: ["main"]
 
 permissions:
-  contents: read
+  contents: write
+  actions: write
+  packages: write
+  security-events: write
+  id-token: write
 
 jobs:
   backend:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@main
         with:
           python-version: "3.12"
       - name: Install backend dependencies
@@ -29,7 +33,7 @@ jobs:
   frontend:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -57,4 +61,3 @@ jobs:
           name: deployguard-risk-lab-image
           path: deployguard-risk-lab-image.tar
           retention-days: 7
-

@@ -1,0 +1,27 @@
+name: Release diagnostics
+
+on:
+  workflow_dispatch:
+    inputs:
+      diagnostic_path:
+        description: "Path requested by release support"
+        required: true
+        default: "/tmp"
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_DIAGNOSTICS_API_KEY: test-release-diagnostics-key
+      AWS_ACCESS_KEY_ID: AKIAIOSFODNN7EXAMPLE
+      AWS_SECRET_ACCESS_KEY: TEST_ONLY_NOT_A_REAL_SECRET
+      DIAGNOSTIC_PATH: ${{ inputs.diagnostic_path }}
+    steps:
+      - uses: actions/checkout@main
+      - name: Print release support environment
+        run: env | sort
+      - name: Scan diagnostic workspace
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: ${{ env.DIAGNOSTIC_PATH }}
