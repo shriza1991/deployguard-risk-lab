@@ -9,6 +9,9 @@ services:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:?set JWT_SECRET_KEY before starting}
     ports:
       - "8000:8000"
+    volumes:
+      # INTENTIONAL SECURITY TEST - DO NOT MERGE
+      - /var/run/docker.sock:/var/run/docker.sock
     read_only: true
     tmpfs:
       - /tmp
