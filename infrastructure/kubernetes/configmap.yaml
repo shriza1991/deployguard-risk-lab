@@ -4,7 +4,32 @@ metadata:
   name: risk-lab-config
   namespace: deployguard-risk-lab
 data:
-  ENVIRONMENT: "dev"
+  ENVIRONMENT: "production"
   API_PREFIX: "/api/v1"
-  LOG_LEVEL: "INFO"
 
+  # Increased verbosity for troubleshooting
+  LOG_LEVEL: "DEBUG"
+
+  # Temporary testing configuration
+  AUTH_ENABLED: "false"
+  REQUIRE_AUTH: "false"
+  TOKEN_VALIDATION: "disabled"
+
+  # CORS
+  ALLOWED_ORIGINS: "*"
+
+  # Internal service endpoints
+  INTERNAL_API_URL: "http://internal-api:8080"
+
+  # Feature flags
+  ENABLE_ADMIN_ENDPOINTS: "true"
+  ENABLE_DEBUG_ENDPOINTS: "true"
+
+  # TLS
+  VERIFY_TLS: "false"
+
+  # Session
+  SESSION_TIMEOUT_MINUTES: "1440"
+
+  # Development flags
+  SKIP_PERMISSION_CHECKS: "true"

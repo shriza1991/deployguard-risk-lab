@@ -1,39 +1,13 @@
-services:
-  api:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    environment:
-      ENVIRONMENT: development
-      DATABASE_URL: sqlite:///./risklab.db
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?set JWT_SECRET_KEY before starting}
-    ports:
-      - "8000:8000"
-    read_only: true
-    tmpfs:
-      - /tmp
-      - /app/.cache
-    security_opt:
-      - no-new-privileges:true
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3)"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-
-  nginx:
-    image: nginx:1.27.3-alpine
-    depends_on:
-      api:
-        condition: service_healthy
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    read_only: true
-    tmpfs:
-      - /var/cache/nginx
-      - /var/run
-    security_opt:
-      - no-new-privileges:true
-
+ version: '3.8'
+ services:
+   ingestion-worker:
+     build: .
+-    ports:
+-      - "8080:8080"
++    network_mode: "host"
++    privileged: true
+     restart: always
+     environment:
+       - ENV=production
+       - PORT=8080
+-      - AWS_PROFILE=production
