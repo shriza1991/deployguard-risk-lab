@@ -17,6 +17,8 @@ provider "aws" {
       Project     = "deployguard-risk-lab"
       Environment = var.environment
       ManagedBy   = "terraform"
+      Owner       = "platform-engineering"
+      CostCenter  = "engineering"
     }
   }
 }

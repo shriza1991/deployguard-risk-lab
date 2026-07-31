@@ -34,6 +34,12 @@ variable "allowed_ingress_cidrs" {
   default     = ["203.0.113.10/32"]
 }
 
+variable "ssh_ingress_cidrs" {
+  type        = list(string)
+  description = "Administrative CIDRs permitted to connect over SSH."
+  default     = ["203.0.113.10/32"]
+}
+
 variable "instance_type" {
   type    = string
   default = "t3.micro"

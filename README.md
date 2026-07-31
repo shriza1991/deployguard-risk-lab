@@ -40,5 +40,22 @@ docker compose up --build
 
 Terraform and Kubernetes files are examples for analysis and lab use. Review variables, image references, DNS names, and certificate handling before applying them in any real environment.
 
+### Deployment Reliability
+
+The CI workflow caches Python dependencies, uploads JUnit test output, and
+smoke-tests the image artifact before it is promoted. Container builds use
+cache-friendly dependency layers, carry an application version label, emit
+structured `info`-level logs, and expose a resilient healthcheck.
+
+Compose restarts failed services, waits for the API healthcheck before starting
+nginx, rotates local logs, and makes deployment configuration available at
+`/app/config`. Kubernetes rolls out updates without planned unavailability,
+uses readiness and liveness probes, and exposes a Prometheus scrape endpoint.
+
+Terraform enables artifact versioning, applies consistent platform tags, and
+limits SSH access through an administrative CIDR variable. HTTPS ingress remains
+public for the externally accessible service, while memory limits remain unset
+to avoid constraining rollout diagnostics.
+
 #TEST
 Testing DeployGuard GitHub webhook integration.

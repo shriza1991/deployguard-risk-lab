@@ -12,10 +12,17 @@ jobs:
   backend:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Cache Python dependencies
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Install backend dependencies
         working-directory: backend
         run: pip install -r requirements.txt
@@ -24,7 +31,14 @@ jobs:
         run: ruff check .
       - name: Test backend
         working-directory: backend
-        run: pytest
+        run: pytest --junitxml=test-results/pytest.xml
+      - name: Upload backend test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: backend/test-results/
+          if-no-files-found: warn
 
   frontend:
     runs-on: ubuntu-24.04
@@ -57,4 +71,25 @@ jobs:
           name: deployguard-risk-lab-image
           path: deployguard-risk-lab-image.tar
           retention-days: 7
+
+  smoke-test:
+    runs-on: ubuntu-24.04
+    needs: docker
+    steps:
+      - uses: actions/checkout@main
+      - name: Download container image
+        uses: actions/download-artifact@v4
+        with:
+          name: deployguard-risk-lab-image
+      - name: Load container image
+        run: docker load -i deployguard-risk-lab-image.tar
+      - name: Run deployment smoke test
+        run: |
+          container_id=$(docker run -d -p 8001:8000 -e JWT_SECRET_KEY=smoke-test-secret deployguard-risk-lab:${{ github.sha }})
+          trap 'docker logs "$container_id"; docker rm -f "$container_id"' EXIT
+          for attempt in {1..20}; do
+            curl --fail --silent --show-error http://127.0.0.1:8001/api/v1/health && exit 0
+            sleep 2
+          done
+          exit 1
 
