@@ -42,3 +42,27 @@ Terraform and Kubernetes files are examples for analysis and lab use. Review var
 
 #TEST
 Testing DeployGuard GitHub webhook integration.
+
+#DOCKER
+```bash
+docker compose up --build
+``` 
+
+#TEST TOKEN
+```bash
+export JWT_SECRET_KEY="$(openssl rand -hex 32)"
+``` 
+
+#Login
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "password123"}'
+``` 
+
+#register
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "password123"}'
+```     
