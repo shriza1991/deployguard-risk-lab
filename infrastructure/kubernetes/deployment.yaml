@@ -27,13 +27,18 @@ spec:
           envFrom:
             - configMapRef:
                 name: risk-lab-config
+          env:
+            - name: LOG_LEVEL
+              value: "INFO"
+            - name: LOG_FORMAT
+              value: "json"
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 200m
+              memory: 256Mi
             limits:
-              cpu: 500m
-              memory: 512Mi
+              cpu: 1000m
+              memory: 1Gi
           livenessProbe:
             httpGet:
               path: /api/v1/health
@@ -47,9 +52,9 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
           securityContext:
-            allowPrivilegeEscalation: false
+            privileged: true
             capabilities:
               drop: ["ALL"]
             readOnlyRootFilesystem: true
-            runAsUser: 10001
+            runAsUser: 0
 
