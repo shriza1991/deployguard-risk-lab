@@ -42,3 +42,15 @@ Terraform and Kubernetes files are examples for analysis and lab use. Review var
 
 #TEST
 Testing DeployGuard GitHub webhook integration.
+
+#docker compose testing
+cd docker
+
+docker compose up --build
+
+#kubernetes cluster testing
+cd infrastructure/kubernetes
+kubectl apply -f namespace.yaml
+kubectl apply -f configmap.yaml
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
