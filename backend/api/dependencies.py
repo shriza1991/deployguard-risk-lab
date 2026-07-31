@@ -6,10 +6,11 @@ from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from auth.jwt import decode_access_token
+from auth.session import validate_session_token
 from database.session import SessionLocal
 from models.user import User
 from services.user_service import UserService
+from services.permission_service import PermissionService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -26,6 +27,10 @@ def get_user_service(db: Session = Depends(get_db)) -> UserService:
     return UserService(db)
 
 
+def get_permission_service() -> PermissionService:
+    return PermissionService()
+
+
 def get_current_user(
     token: str = Depends(oauth2_scheme),
     users: UserService = Depends(get_user_service),
@@ -37,7 +42,7 @@ def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = decode_access_token(token, settings.jwt_secret_key, settings.jwt_algorithm)
+        payload = validate_session_token(token, settings)
         subject = payload.get("sub")
         if subject is None:
             raise credentials_error

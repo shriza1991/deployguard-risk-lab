@@ -25,6 +25,8 @@ def login(
         secret_key=settings.jwt_secret_key,
         algorithm=settings.jwt_algorithm,
         expires_minutes=settings.access_token_expire_minutes,
+        issuer=settings.token_issuer,
+        audience=settings.token_audience,
     )
     return TokenResponse(access_token=token, token_type="bearer")
 
