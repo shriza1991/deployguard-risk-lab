@@ -11,6 +11,7 @@ export function AppLayout() {
         <nav>
           <NavLink to="/">Dashboard</NavLink>
           <NavLink to="/users">Users</NavLink>
+          <NavLink to="/profile">My profile</NavLink>
         </nav>
         <button className="secondary" onClick={logout}>Sign out</button>
       </aside>
@@ -20,4 +21,3 @@ export function AppLayout() {
     </div>
   );
 }
-

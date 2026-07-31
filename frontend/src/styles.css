@@ -160,6 +160,29 @@ button {
   color: #b91c1c;
 }
 
+.profile-form {
+  background: white;
+  border: 1px solid #d8dee9;
+  border-radius: 8px;
+  display: grid;
+  gap: 1rem;
+  max-width: 520px;
+  padding: 1.5rem;
+}
+
+.profile-form label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.profile-form input {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.muted-text { color: #5b6472; }
+
 @media (max-width: 720px) {
   .app-shell {
     grid-template-columns: 1fr;
